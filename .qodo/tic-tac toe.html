@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        #board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 5px;
+            margin: 20px auto;
+            justify-content: center;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: white;
+            border: 2px solid #333;
+            font-size: 2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .cell:hover {
+            background-color: #e0e0e0;
+        }
+        .cell.x { color: #e74c3c; } /* Red for X */
+        .cell.o { color: #3498db; } /* Blue for O */
+        .cell.winner { background-color: #d4edda; } /* Highlight winner */
+        #status {
+            font-size: 1.2em;
+            margin: 20px;
+            color: #333;
+        }
+        #reset {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #reset:hover {
+            background-color: #219a52;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tic-Tac-Toe</h1>
+    <p>Click on a cell to place your mark. X goes first!</p>
+    
+    <div id="board"></div>
+    
+    <div id="status">Player X's turn</div>
+    <button id="reset">New Game</button>
+
+    <script>
+        // Game variables
+        let board = ['', '', '', '', '', '', '', '', '']; // 3x3 board
+        let currentPlayer = 'X';
+        let gameActive = true;
+        const statusDisplay = document.getElementById('status');
+        const boardElement = document.getElementById('board');
+        const resetButton = document.getElementById('reset');
+
+        // Winning conditions (rows, columns, diagonals)
+        const winningConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6]              // Diagonals
+        ];
+
+        // Create the board cells
+        function createBoard() {
+            boardElement.innerHTML = '';
+            board.forEach((_, index) => {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.dataset.index = index;
+                cell.addEventListener('click', handleCellClick);
+                boardElement.appendChild(cell);
+            });
+        }
+
+        // Handle cell click
+        function handleCellClick(event) {
+            const index = event.target.dataset.index;
+            if (board[index] !== '' || !gameActive) return; // Invalid move
+
+            board[index] = currentPlayer;
+            event.target.textContent = currentPlayer;
+            event.target.classList.add(currentPlayer.toLowerCase());
+
+            if (checkWinner()) {
+                statusDisplay.textContent = `Player ${currentPlayer} wins! 🎉`;
+                gameActive = false;
+                highlightWinner();
+            } else if (board.every(cell => cell !== '')) {
+                statusDisplay.textContent = "It's a draw! 🤝";
+                gameActive = false;
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                statusDisplay.textContent = `Player ${currentPlayer}'s turn`;
+            }
+        }
+
+        // Check for winner
+        function checkWinner() {
+            return winningConditions.some(condition => {
+                return condition.every(index => board[index] === currentPlayer);
+            });
+        }
+
+        // Highlight winning cells
+        function highlightWinner() {
+            winningConditions.forEach(condition => {
+                if (condition.every(index => board[index] === currentPlayer)) {
+                    condition.forEach(index => {
+                        const cell = document.querySelector(`[data-index="${index}"]`);
+                        cell.classList.add('winner');
+                    });
+                }
+            });
+        }
+
+        // Reset game
+        function resetGame() {
+            board = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            gameActive = true;
+            statusDisplay.textContent = "Player X's turn";
+            createBoard(); // Recreate to clear cells
+        }
+
+        // Event listeners
+        resetButton.addEventListener('click', resetGame);
+
+        // Initialize the game
+        createBoard();
+    </script>
+</body>
+</html>
